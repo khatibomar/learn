@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "learn-visual": {
+      "command": "${workspaceFolder}/bin/learn-visual",
+      "args": ["mcp"],
+      "env": { "LEARN_ROOT": "${workspaceFolder}" }
+    }
+  }
+}

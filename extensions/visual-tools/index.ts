@@ -4,18 +4,11 @@
  * A self-contained pi extension that registers custom subagent tools with the
  * globally-loaded `interactive-subagents` extension — and does nothing else:
  *
- *   • write_mermaid / edit_mermaid / render_mermaid
- *       (tools/mermaid_tools.ts) — the mermaid-maker's authoring loop: write a
- *       Mermaid source, exact-match edit it, render whatever is currently in
- *       the managed file to a PNG (via the bundled @mermaid-js/mermaid-cli and
- *       an installed Chrome), return the PNG inline for inspection, and — when
- *       given `save_as` — publish it into <cwd>/viz with a unique name.
- *   • write_svg / edit_svg / render_svg
- *       (tools/svg_tools.ts) — the svg-maker's authoring loop: same shape, but
- *       renders hand-written SVG to a PNG via rsvg-convert (fallback: magick).
+ *   • write_mermaid / edit_mermaid / render_mermaid — the mermaid-maker's loop
+ *   • write_svg / edit_svg / render_svg — the svg-maker's loop
  *
- * Each trio maps to ONE file so interactive-subagents loads it once and
- * allow-lists all three names.
+ * All six live in tools/visual_tools.ts, a thin wrapper over the `learn-visual`
+ * Go binary (see ../../visual), which renders with headless Firefox.
  *
  * ── How registration reaches interactive-subagents ──────────────────────────
  * The global `interactive-subagents` extension exposes `registerToolExtension`
@@ -38,8 +31,7 @@ import * as path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const EXT_DIR = path.dirname(fileURLToPath(import.meta.url))
-const MERMAID_TOOLS = path.join(EXT_DIR, "tools", "mermaid_tools.ts")
-const SVG_TOOLS = path.join(EXT_DIR, "tools", "svg_tools.ts")
+const VISUAL_TOOLS = path.join(EXT_DIR, "tools", "visual_tools.ts")
 
 interface InteractiveSubagentsApi {
   registerToolExtension: (name: string, extensionPath: string) => void
@@ -50,17 +42,10 @@ function registerToolExtensions(): void {
   const api = (globalThis as any).__pi_interactive_subagents as InteractiveSubagentsApi | undefined
   if (!api?.registerToolExtension) return // interactive-subagents not loaded — no-op
 
-  for (const [name, toolPath] of [
-    ["write_mermaid", MERMAID_TOOLS],
-    ["edit_mermaid", MERMAID_TOOLS],
-    ["render_mermaid", MERMAID_TOOLS],
-    ["write_svg", SVG_TOOLS],
-    ["edit_svg", SVG_TOOLS],
-    ["render_svg", SVG_TOOLS],
-  ] as const) {
-    if (!fs.existsSync(toolPath)) continue
+  if (!fs.existsSync(VISUAL_TOOLS)) return
+  for (const name of ["write_mermaid", "edit_mermaid", "render_mermaid", "write_svg", "edit_svg", "render_svg"]) {
     try {
-      api.registerToolExtension(name, toolPath)
+      api.registerToolExtension(name, VISUAL_TOOLS)
     } catch {
       // Already registered under a different path, or re-registered — ignore.
     }

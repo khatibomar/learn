@@ -16,3 +16,6 @@ __pycache__/
 # Runtime state
 .memory/
 *.log
+
+# Build output
+bin/

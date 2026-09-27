@@ -20,7 +20,7 @@ Do NOT visualize when prose or a single equation already carries it. A decorativ
 
 ## Choose the maker
 
-Two makers, discovered from `.pi/agents/`:
+Two makers, defined in `agents/` (pi: `.pi/agents/`, Claude Code: `.claude/agents/`, OpenCode: `.opencode/agent/`):
 
 - **`mermaid-maker`** — structural/relational visuals: dependency graphs, flowcharts, sequence/state/ER/class diagrams, trees, mindmaps, timelines. This is the default and fits the dependency-graph pedagogy directly.
 - **`svg-maker`** — spatial/geometric visuals Mermaid can't lay out: exact coordinates, geometry figures, number lines, vectors, plots, custom shapes.
@@ -49,6 +49,8 @@ subagent(agent="mermaid-maker", task="<your minimal, concrete brief>")
 subagent(agent="svg-maker", task="<your minimal, concrete brief>")
 ```
 
+On other agents, use the agent's own subagent mechanism with the same agent name and brief (Claude Code: the `Agent` tool; OpenCode: `@mermaid-maker`). If your agent has no subagents, be the maker yourself: read `agents/mermaid-maker.md` or `agents/svg-maker.md` and follow it with the `learn-visual` MCP tools. If the MCP tools are not available either, do not make an SVG picture. For a small structural diagram, you can put a fenced ```mermaid``` block in the reply, and say that nobody rendered or checked it.
+
 The maker owns its own purpose-built tools (`write_*`/`edit_*`/`render_*`) — it authors the source, renders it to a PNG, **looks at the PNG and iterates until it is correct and clean**, publishes it into the vault with a unique filename, and returns:
 
 ```
@@ -75,4 +77,4 @@ That's all. The `md-log` extension mirrors your reply text verbatim into the lin
 - PNG embed means **what the maker verified is pixel-identical to what the learner sees** — no re-render drift.
 - Unique filenames keep Obsidian's by-filename embed resolution unambiguous.
 
-> The makers render through the project's `visual-tools` extension (Mermaid via a bundled `@mermaid-js/mermaid-cli` + installed Chrome; SVG via `rsvg-convert`, fallback ImageMagick). You don't render anything yourself — you only brief the maker and embed the filename it returns.
+> The makers render through the project's `visual-tools` extension (the `learn-visual` Go binary, which renders both Mermaid and SVG in headless Firefox). You don't render anything yourself — you only brief the maker and embed the filename it returns.

@@ -7,6 +7,8 @@ description: Teach the user anything so it actually locks in and is understood, 
 
 Two principles. They are not tips — they are how you teach him, every time. No other teaching methods come close. Apply them to any explanation, from a one-liner to a deep dive.
 
+> **Tools.** This skill names `quiz`, `ask_user_question`, the `researcher` subagent, and the `md-log` file. If your agent does not have one of them, read [tools.md](tools.md) and use the replacement it gives.
+
 The goal is never "he can recite the fact." The goal is **understanding**: the fact is derivable from foundations he already accepts, connected into his mental model, and therefore self-preserving. Memorized facts rot. Understood facts don't.
 
 ## The philosophy (why this works — internalize it)

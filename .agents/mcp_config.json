@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "learn-visual": {
+      "command": "./bin/learn-visual",
+      "args": ["mcp"]
+    }
+  }
+}
