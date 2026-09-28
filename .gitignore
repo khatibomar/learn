@@ -22,3 +22,6 @@ bin/
 
 # md-log state
 .learn/
+
+# Obsidian per-user state
+.obsidian/workspace*.json

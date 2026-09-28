@@ -1,11 +1,5 @@
 # learn
 
-[![video](assets/thumbnail.png)](https://www.youtube.com/watch?v=kzcI5F4tGiU)
-
-My AI learning system from this video: [How I Use AI to Learn Things](https://www.youtube.com/watch?v=kzcI5F4tGiU).
-
-This is a personal system I built for myself, shared as-is. It started as a pi configuration. It now also works with other coding agents: Claude Code, OpenCode, Gemini CLI, and any agent that reads `AGENTS.md` and supports MCP.
-
 ## What's in it
 
 - `skills/teach/` — the philosophy and the process
@@ -21,15 +15,21 @@ This is a personal system I built for myself, shared as-is. It started as a pi c
 
 ## Install
 
-Clone the repo as your learning project, and build the diagram tools:
+This repo is a template. Make one clone for each topic that you learn:
 
 ```bash
-git clone https://github.com/amosblomqvist/learn
-cd learn
-go -C visual build -o ../bin/learn-visual .
+git clone git@github.com:khatibomar/learn.git rust-async
+cd rust-async
+./setup
 ```
 
-Then open your agent in the `learn` directory.
+The `setup` script does these steps:
+
+1. It builds the diagram tools to `bin/learn-visual`.
+2. It renames the `origin` remote to `template`. Your notes do not go to the template repo. To get template updates, run `git pull template main`.
+3. It adds the folder to the Obsidian vault registry and opens the vault in Obsidian. It supports only Obsidian from Flatpak on Linux. This step needs `jq`. If Obsidian runs, the script cannot add the vault. Close Obsidian and run `./setup` again.
+
+Then start your agent in the same folder. The vault config in `.obsidian/` hides the system files from search and the graph. New notes go to `notes/`, and diagrams go to `viz/`.
 
 | Agent | Instructions | Skills | Subagents | Diagram tools (MCP) |
 |---|---|---|---|---|

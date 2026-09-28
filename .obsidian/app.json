@@ -1,0 +1,18 @@
+{
+  "attachmentFolderPath": "viz",
+  "newFileLocation": "folder",
+  "newFileFolderPath": "notes",
+  "userIgnoreFilters": [
+    "agents/",
+    "assets/",
+    "bin/",
+    "extensions/",
+    "skills/",
+    "visual/",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "opencode.json",
+    "setup"
+  ]
+}

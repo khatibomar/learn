@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Prepare a fresh clone of this template as a learning project.
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+go -C visual build -o ../bin/learn-visual .
+
+if [ "$(git remote get-url origin 2>/dev/null)" != "" ] && ! git remote | grep -qx template; then
+	git remote rename origin template
+fi
+
+# Obsidian opens only vaults that are in its registry, so add this folder there first.
+init_obsidian() {
+	local vault registry
+	vault="$(pwd -P)"
+	registry="$HOME/.var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json"
+	mkdir -p .obsidian
+
+	[ -s "$registry" ] || { mkdir -p "$(dirname "$registry")" && echo '{"vaults":{}}' >"$registry"; }
+	if ! jq -e --arg p "$vault" '.vaults // {} | any(.path == $p)' "$registry" >/dev/null; then
+		# Obsidian writes the registry when it exits, which removes a vault added while it runs.
+		if pgrep -x obsidian >/dev/null; then
+			echo "Close Obsidian and run ./setup again to register this vault."
+			return
+		fi
+		local tmp
+		tmp="$(mktemp)"
+		jq --arg id "$(openssl rand -hex 8)" --arg p "$vault" --argjson ts "$(date +%s%3N)" \
+			'.vaults[$id] = {path: $p, ts: $ts}' "$registry" >"$tmp" && mv "$tmp" "$registry"
+	fi
+
+	setsid flatpak run md.obsidian.Obsidian "obsidian://open?path=$(jq -rn --arg p "$vault" '$p | @uri')" \
+		>/dev/null 2>&1 </dev/null &
+	disown
+}
+
+init_obsidian
+
+echo "Ready. Start your agent in this folder."
