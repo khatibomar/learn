@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": ["mcp__learn-visual__quiz", "mcp__learn-visual__md_log"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion|mcp__learn-visual__quiz",
+        "hooks": [{ "type": "command", "command": "LEARN_ROOT=\"$CLAUDE_PROJECT_DIR\" \"$CLAUDE_PROJECT_DIR/bin/learn-visual\" hook claude" }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "LEARN_ROOT=\"$CLAUDE_PROJECT_DIR\" \"$CLAUDE_PROJECT_DIR/bin/learn-visual\" hook claude" }]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [{ "type": "command", "command": "LEARN_ROOT=\"$CLAUDE_PROJECT_DIR\" \"$CLAUDE_PROJECT_DIR/bin/learn-visual\" hook claude" }]
+      }
+    ]
+  }
+}

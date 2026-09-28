@@ -1,9 +1,40 @@
 {
-  "context": { "fileName": ["AGENTS.md"] },
+  "context": {
+    "fileName": [
+      "AGENTS.md"
+    ]
+  },
   "mcpServers": {
     "learn-visual": {
       "command": "bin/learn-visual",
-      "args": ["mcp"]
+      "args": [
+        "mcp"
+      ]
     }
+  },
+  "hooksConfig": {
+    "enabled": true
+  },
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$GEMINI_PROJECT_DIR/bin/learn-visual\" hook gemini"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$GEMINI_PROJECT_DIR/bin/learn-visual\" hook gemini"
+          }
+        ]
+      }
+    ]
   }
 }

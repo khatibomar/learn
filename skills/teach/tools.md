@@ -1,17 +1,17 @@
 # Tools on any agent
 
-The teach and visualize skills name four capabilities: `quiz`, `ask_user_question`, `researcher`, and the `md-log` file. pi gets them from the extensions in this repo. Other agents may not have them. Use this table to find the replacement. Do not skip a phase of the skill because a tool is missing.
+The teach and visualize skills name four capabilities: `quiz`, `ask_user_question`, `researcher`, and the `md-log` file. pi gets them from the extensions in this repo. On other agents, the `learn-visual` MCP server gives the `quiz` and `md_log` tools, and hooks in this repo write the log. Use this table to find the replacement. Do not skip a phase of the skill because a tool is missing.
 
 | Capability | pi | Other agent |
 |---|---|---|
-| `quiz` | `quiz` tool | Your own multiple-choice question tool if you have one, else the chat protocol below |
+| `quiz` | `quiz` tool | The `quiz` tool of the `learn-visual` MCP server. It shows a form if your agent supports MCP elicitation. If it says the form is not available, use the chat protocol below |
 | `ask_user_question` | `ask_user_question` tool | Your own question tool (Claude Code: `AskUserQuestion`), else ask in chat |
 | `researcher` | `researcher` subagent | A `researcher` subagent if your agent supports subagents, else do the research yourself with your web search and fetch tools |
-| `md-log` | `/md-log <file>` | The log protocol below |
+| `md-log` | `/md-log <file>` | The `md_log` tool of the `learn-visual` MCP server. See the log section below |
 
 ## Quiz protocol (chat)
 
-Use this when you have no `quiz` tool. Your own question tool (for example Claude Code `AskUserQuestion`) can show the options, but you still do the grading.
+Use this only when the `quiz` tool says that the form is not available. Do not use `AskUserQuestion` for a quiz: it shows the options in the order you write them, and you must grade.
 
 1. Decide the correct answer and the explanation first. Keep both to yourself.
 2. Build the options with the construction procedure in `SKILL.md`. Shuffle them, so the correct answer is not in a fixed position.
@@ -22,12 +22,8 @@ Use this when you have no `quiz` tool. Your own question tool (for example Claud
 
 If the user adds a note to the answer, read the note. It often shows the misconception.
 
-## Log protocol (markdown file)
+## Log (markdown file)
 
-Use this when you have no `md-log` extension. The user starts it with "log to `<file>.md`" and stops it with "stop logging".
+The user starts the log with `/md-log <file>` or "log to `<file>.md`", and stops it with `/md-unlog` or "stop logging". Call the `md_log` tool with `action: "link"` and the file, or with `action: "unlink"`. The file must exist.
 
-- After each reply, append that reply to the file, unchanged: lesson text, math, and `![[viz-...png|500]]` embeds.
-- Append each user prompt as a `> **You:** ...` quote block.
-- For each quiz, append the question and options before the user answers. Append the answer, the grade, and the explanation only after the user answers.
-- Do not log tool calls, file reads, or shell output.
-- Append only. Never rewrite earlier content in the file.
+Hooks then append each user prompt and each reply to the file. The `quiz` tool writes its questions and answers. Do not write to the log file yourself.

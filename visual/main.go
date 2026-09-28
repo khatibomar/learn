@@ -1,10 +1,12 @@
 // Command learn-visual renders Mermaid and SVG diagrams to PNG with headless
-// Firefox. It serves the six diagram tools over MCP for any agent, and runs
-// single tool calls for the pi extension.
+// Firefox. It serves the six diagram tools and the quiz tool over MCP for any
+// agent, and runs single diagram tool calls for the pi extension.
 //
 //	learn-visual mcp                            MCP server on stdio
 //	learn-visual tools                          tool definitions as JSON
 //	learn-visual call <tool> --state <dir>      one call, JSON args on stdin
+//	learn-visual log link <file.md> | unlink | status
+//	learn-visual hook <agent>                   md-log hook, hook JSON on stdin
 //
 // Published PNGs go to $LEARN_ROOT/viz, or ./viz when LEARN_ROOT is not set.
 package main
@@ -19,11 +21,12 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-const usage = "usage: learn-visual mcp | tools | call <tool> --state <dir>"
+const usage = "usage: learn-visual mcp | tools | call <tool> --state <dir> | log link <file> | log unlink | log status | hook <agent>"
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -45,17 +48,48 @@ func run(ctx context.Context, args []string) error {
 		return json.MarshalWrite(os.Stdout, Tools())
 	case "call":
 		return callOnce(ctx, args[1:])
+	case "log":
+		return logCommand(args[1:])
+	case "hook":
+		if len(args) != 2 {
+			return errors.New(usage)
+		}
+		// A hook must not block the agent, so errors go to stderr only.
+		if err := runHook(args[1], os.Stdin); err != nil {
+			fmt.Fprintln(os.Stderr, "learn-visual:", err)
+		}
+		return nil
 	}
 	return errors.New(usage)
 }
 
+func logCommand(args []string) error {
+	root, err := learnRoot()
+	if err != nil {
+		return err
+	}
+	var msg string
+	switch {
+	case len(args) >= 1 && args[0] == "link":
+		msg, err = logLink(root, strings.TrimSpace(strings.Join(args[1:], " ")))
+	case len(args) == 1 && args[0] == "unlink":
+		msg, err = logUnlink(root)
+	case len(args) == 1 && args[0] == "status":
+		msg, err = logStatus(root)
+	default:
+		return errors.New(usage)
+	}
+	if err != nil {
+		return err
+	}
+	fmt.Println(msg)
+	return nil
+}
+
 func vizDir() (string, error) {
-	root := os.Getenv("LEARN_ROOT")
-	if root == "" {
-		var err error
-		if root, err = os.Getwd(); err != nil {
-			return "", err
-		}
+	root, err := learnRoot()
+	if err != nil {
+		return "", err
 	}
 	return filepath.Join(root, "viz"), nil
 }
@@ -132,6 +166,8 @@ func serveMCP(ctx context.Context) error {
 			return toMCP(s.Call(ctx, t, params)), nil
 		})
 	}
+	addQuizTool(server)
+	addLogTool(server)
 	return server.Run(ctx, &mcp.StdioTransport{})
 }
 

@@ -4,7 +4,7 @@
 
 My AI learning system from this video: [How I Use AI to Learn Things](https://www.youtube.com/watch?v=kzcI5F4tGiU).
 
-This is a personal system I built for myself, shared as-is. It started as a pi configuration. It now also works with other coding agents: Claude Code, Codex, OpenCode, Cursor, Gemini CLI, and any agent that reads `AGENTS.md` and supports MCP.
+This is a personal system I built for myself, shared as-is. It started as a pi configuration. It now also works with other coding agents: Claude Code, OpenCode, Gemini CLI, and any agent that reads `AGENTS.md` and supports MCP.
 
 ## What's in it
 
@@ -13,8 +13,8 @@ This is a personal system I built for myself, shared as-is. It started as a pi c
 - `skills/visualize/` — adds a correct, minimal diagram to a lesson when an idea is clearer as a picture
 - `extensions/ask-user-question.ts` — (pi) the agent asks you questions through a UI popup
 - `extensions/quiz.ts` — (pi) graded questions with instant feedback (✓/✗, correct answer, explanation)
-- `extensions/md-log.ts` — (pi) link a markdown file to the session
-- `visual/` — `learn-visual`, a Go program that renders Mermaid and SVG to PNG with headless Firefox. It serves the diagram tools over MCP.
+- `extensions/md-log.ts` — (pi) link a markdown file to the session. Other agents use the `md_log` tool and the hooks below
+- `visual/` — `learn-visual`, a Go program that renders Mermaid and SVG to PNG with headless Firefox. It serves the diagram tools and a `quiz` tool over MCP.
 - `extensions/visual-tools/` — (pi) thin wrapper that exposes `learn-visual` as pi tools for the visualization subagents
 - `agents/` — `researcher`, `svg-maker`, `mermaid-maker`: the subagents the system delegates to
 - `AGENTS.md` — entry point for agents other than pi
@@ -35,14 +35,12 @@ Then open your agent in the `learn` directory.
 |---|---|---|---|---|
 | pi | `AGENTS.md` | `.pi/skills` | `.pi/agents` | `.pi/extensions` (pi extension over `bin/learn-visual`) |
 | Claude Code | `AGENTS.md` | `.claude/skills` | `.claude/agents` | `.mcp.json` |
-| Codex | `AGENTS.md` | `.agents/skills` | — | `.codex/config.toml` |
 | OpenCode | `AGENTS.md` | `.claude/skills` | `.opencode/agent` | `opencode.json` |
-| Cursor | `AGENTS.md` | `.agents/skills` | — | `.cursor/mcp.json` |
 | Gemini CLI | `.gemini/settings.json` | — | — | `.gemini/settings.json` |
 
-The `.pi`, `.claude/skills`, and `.agents/skills` entries are symlinks to the top-level folders. On Windows, enable symlinks in git (`git config core.symlinks true`) before you clone.
+The `.pi` and `.claude/skills` entries are symlinks to the top-level folders. On Windows, enable symlinks in git (`git config core.symlinks true`) before you clone.
 
-Some agents ask you to trust the project or approve the MCP server on first start. Codex reads `.codex/config.toml` only in a trusted project.
+Some agents ask you to trust the project or approve the MCP server on first start.
 
 For any other agent, point it at `AGENTS.md` and add this MCP server:
 
@@ -73,7 +71,27 @@ go -C .pi/visual build -o ../bin/learn-visual .
 
 ### Other agents
 
-The `quiz`, `ask_user_question`, and `md-log` extensions are pi only. On other agents, the skills use the chat protocols in `skills/teach/tools.md`: quizzes in chat, graded by the agent, and a markdown log that the agent appends to. Say "log to `<file>.md`" to start the log.
+The `ask_user_question` extension is pi only. On other agents, the skills use the replacements in `skills/teach/tools.md`.
+
+### md-log on other agents
+
+Run `/md-log <file.md>` (or say "log to `<file.md>`") to link an existing note. `/md-unlog` stops the log. The agent calls the `md_log` MCP tool. Hooks then append each prompt and each reply to the note, and the current session is backfilled. The `quiz` tool writes the quiz questions and answers itself. The link is kept in `.learn/md-log.json`, and it applies to all sessions in the project until you unlink.
+
+You can also link from a shell: `bin/learn-visual log link <file.md>`, `bin/learn-visual log unlink`, `bin/learn-visual log status`.
+
+| Agent | Hooks | What is logged |
+|---|---|---|
+| Claude Code | `.claude/settings.json` | Full transcript: prompts, all reply text, `AskUserQuestion` questions and answers, quizzes in order. Tested |
+| Gemini CLI | `.gemini/settings.json` | Each prompt and the final reply of each turn. Not tested |
+| OpenCode | `.opencode/plugin/md-log.ts` | Prompts and all reply text, at the end of each turn. Not tested |
+
+The `learn-visual` MCP server has a `quiz` tool for agents other than pi. It uses MCP elicitation to show the question as a form. The server shuffles the options and grades the answer, so the agent cannot show the answer too early.
+
+| Agent | Quiz form |
+|---|---|
+| Claude Code | Yes (2.1.76 or later) |
+| OpenCode | No. The agent asks the quiz in chat |
+| Gemini CLI | No. The agent asks the quiz in chat |
 
 ## Notes
 

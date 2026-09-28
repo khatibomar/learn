@@ -7,13 +7,13 @@ This project is a learning workspace. The user comes here to learn things. Your 
 - `skills/teach/SKILL.md` — how to teach. Use it every time you explain or teach something, even a short explanation.
 - `skills/visualize/SKILL.md` — how to add one correct, minimal diagram to a lesson.
 
-If your agent loads skills automatically (from `.claude/skills/` or `.agents/skills/`), use them from there. If not, read the `SKILL.md` file before you teach.
+If your agent loads skills automatically (from `.claude/skills/`), use them from there. If not, read the `SKILL.md` file before you teach.
 
 ## Tools
 
 The skills name `quiz`, `ask_user_question`, the `researcher` subagent, and the `md-log` file. If you do not have one of them, use the replacement in `skills/teach/tools.md`.
 
-The `learn-visual` MCP server gives the diagram tools: `write_mermaid`, `edit_mermaid`, `render_mermaid`, `write_svg`, `edit_svg`, `render_svg`. They save PNG files to `viz/`.
+The `learn-visual` MCP server gives the diagram tools: `write_mermaid`, `edit_mermaid`, `render_mermaid`, `write_svg`, `edit_svg`, `render_svg`. They save PNG files to `viz/`. It also gives the `quiz` tool (use it for every graded question) and the `md_log` tool (use it when the user runs `/md-log <file>` or asks to log to a file).
 
 ## Subagents
 

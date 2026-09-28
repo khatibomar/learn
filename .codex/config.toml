@@ -1,3 +1,0 @@
-[mcp_servers.learn-visual]
-command = "bin/learn-visual"
-args = ["mcp"]
